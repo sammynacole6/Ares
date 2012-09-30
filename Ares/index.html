@@ -6,14 +6,14 @@
         
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js"></script>
-        
+        <script type="text/javascript" src="jquery.layout-latest.js"></script>
 
         <script type='text/javascript' src='index.js'></script>
         <script type='text/javascript'>
         $(function(){
             init_csrf_token();
             setup();
-            $('#foo').val('#include <stdio.h> \n#include <stdlib.h> \n\nint main (){ \n  printf("hello world\\n"); \n  return 0; \n}\n');
+            $('#foo').val('INPUT');
         })
         </script>
 
@@ -29,35 +29,52 @@
     </head>
     <body>
         {% csrf_token %}
-<!--
-        <textarea id = "foo" cols='80' rows = '30'> 
 
-        </textarea>
+        <div class='ui-layout-center'>
 
--->
-        <div id="editor">function foo(items) {
-            var x = "All this is syntax highlighted";
-            return x;
-        }</div>
+    <!--
+            <textarea id = "foo" cols='80' rows = '30'> 
+
+            </textarea>
+            <script type="text/javascript">
+                var editor = {
+                    getValue :function(){
+                        return $('#foo').val();
+                    }
+                };
+            </script>
+    -->
+            <div id="editor">
+
+            </div>
+                
+            <script src="//d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+            <script>
+                var editor = ace.edit("editor");
+                editor.setTheme("ace/theme/monokai");
+                editor.getSession().setMode("ace/mode/c_cpp");
+            </script>
             
-        <script src="//d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
-        <script>
-            var editor = ace.edit("editor");
-            editor.setTheme("ace/theme/monokai");
-            editor.getSession().setMode("ace/mode/javascript");
-        </script>
-<!--
-        <script type="text/javascript">
-            var editor = {
-                getValue :function(){
-                    return $('#foo').val();
-                }
-            };
-        </script>
--->
-        <div id="#toolbar">
-            <button id='test'>test</button>
         </div>
+
+        <div id='east' class='ui-layout-east'>
+
+            <div class="ui-layout-north">
+
+                <textarea id="input"></textarea>
+            </div>
+            <div class="ui-layout-center">
+                <div id="#toolbar">
+                    <button id='test'>Compile and Run</button>
+                </div>
+                <div id='results'> 
+
+                </div>
+            </div>
+        </div>
+
+
+
 
     </body>
 </html>

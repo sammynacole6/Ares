@@ -39,17 +39,34 @@ function init_csrf_token(){
 }
 
 function setup(){
+
+
+    $('body').layout({
+        defaults: { 
+            applyDefaultStyles: true,
+            slidable: false,
+            togglerLength_closed: -1
+        },
+        east: {
+            size: 500
+        }
+    });
+    $('#east').layout({
+        defaults: {
+            applyDefaultStyles: true,
+            slidable: false,
+            togglerLength_closed: -1
+        },
+        north: {
+            size: 200
+        }
+    });
+
+
     $('#test').click(function(e){
         e.preventDefault();
-        $.post('index.html', {'cmd': editor.getValue()}, function(data, textstatus, jqXHR){
-            console.log("success: " + textstatus);
-            console.log(jqXHR.content);
-            console.log(data);
-            
-        }).error(function(data, textstatus, jqXHR){
-            console.log("fail: " + textstatus);
-            console.log(jqXHR.content);
-            console.log(data);
+        $.post('index.html', {'cmd': editor.getValue(), 'input': $('#input').val()}, function(data, textstatus, jqXHR){
+            $('#results').html(data);
         });
     });
 }

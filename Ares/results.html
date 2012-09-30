@@ -1,0 +1,15 @@
+<h3>Compilation results</h3>
+<p id='compilation'> 
+{% if compilation %}
+    {{compilation|linebreaks}}
+{% else %}
+    No errors or warnings.
+{% endif %}
+</p>
+
+{% if run %}
+<h3>Run Results</h3>
+<p id='run'>
+    {{run|linebreaks}}
+</p>
+{% endif %}

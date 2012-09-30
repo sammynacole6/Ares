@@ -65,6 +65,7 @@ function setup(){
 
     $('#test').click(function(e){
         e.preventDefault();
+        $('#results').html('<p style="width:100%; text-align:center">running<br/><img src="static/spin.gif" /></p>');
         $.post('index.html', {'cmd': editor.getValue(), 'input': $('#input').val()}, function(data, textstatus, jqXHR){
             $('#results').html(data);
         });

@@ -6,19 +6,18 @@
         
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js"></script>
-        <script type="text/javascript" src="jquery.layout-latest.js"></script>
+        <script type="text/javascript" src="{{STATIC_URL}}jquery.layout-latest.min.js"></script>
 
-        <script type='text/javascript' src='index.js'></script>
+        <script type='text/javascript' src='{{STATIC_URL}}index.js'></script>
         <script type='text/javascript'>
         $(function(){
             init_csrf_token();
             setup();
-            $('#foo').val('INPUT');
         })
         </script>
 
 
-        <link href='index.css' rel='stylesheet' type='text/css'>
+        <link href='{{STATIC_URL}}index.css' rel='stylesheet' type='text/css'>
         <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro' rel='stylesheet' type='text/css'>
 
         <style type="text/css" media="screen">
@@ -29,24 +28,43 @@
     </head>
     <body>
         {% csrf_token %}
+        <div class='ui-layout-west'>
+
+            <button id='newfile'>New File</button>
+            <div class='hidden center' id="newfiledialog">
+                <hr />
+                <input type='text' id='new_file_name' />
+                <button id='create_new_file'>Create file</button>
+            </div>
+
+            <script type='text/javascript'>
+                $('#newfile').button().click(function(){
+                    $('#newfiledialog').slideToggle();
+                });
+
+                $('#create_new_file').button().click(function(){
+                    $.post('.', {'mode': 'new', 'filename': $('#new_file_name').val()});
+                });
+            </script>
+
+
+            <hr />
+            <button id='savefile'>Save Selected</button>
+            <p>Project Files:</p>
+
+            <div id="files">
+                {% for file in files %}
+                <input type="radio" id='file-{{file.pk}}' name='file' /> <label for='file-{{file.pk}}'>{{file.name}}</label>
+                {% endfor %}
+            </div>
+
+
+            <hr />
+            <button>Delete Selected</button>
+        </div>
 
         <div class='ui-layout-center'>
-
-    <!--
-            <textarea id = "foo" cols='80' rows = '30'> 
-
-            </textarea>
-            <script type="text/javascript">
-                var editor = {
-                    getValue :function(){
-                        return $('#foo').val();
-                    }
-                };
-            </script>
-    -->
-            <div id="editor">
-
-            </div>
+            <div id="editor"></div>
                 
             <script src="//d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
             <script>
@@ -58,10 +76,8 @@
         </div>
 
         <div id='east' class='ui-layout-east'>
-
             <div class="ui-layout-north">
-
-                <textarea id="input"></textarea>
+                <textarea id="input" placeholder="Text typed here will be used as program input"></textarea>
             </div>
             <div class="ui-layout-center">
                 <div id="toolbar">

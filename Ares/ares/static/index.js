@@ -42,13 +42,16 @@ function setup(){
 
 
     $('body').layout({
-        defaults: { 
+        defaults: {
             applyDefaultStyles: true,
             slidable: false,
             togglerLength_closed: -1
         },
         east: {
-            size: 500
+            size: 400
+        },
+        west: {
+            size: 200
         }
     });
     $('#east').layout({
@@ -61,6 +64,10 @@ function setup(){
             size: 200
         }
     });
+
+    setInterval(function(){
+        //alert("hai");
+    }, 5000);
 
 
     $('#test').click(function(e){

@@ -59,6 +59,7 @@ MEDIA_URL = ''
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = ''
 
+
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
@@ -104,7 +105,8 @@ ROOT_URLCONF = 'ares.urls'
 WSGI_APPLICATION = 'ares.wsgi.application'
 
 TEMPLATE_DIRS = (
-    PROJECT_ROOT
+    PROJECT_ROOT,
+    PROJECT_ROOT + '/templates'
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -112,11 +114,9 @@ TEMPLATE_DIRS = (
 
 STATICFILES_DIRS
 
-
-
 INSTALLED_APPS = (
     'ares',
-    # 'django.contrib.auth',
+    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',

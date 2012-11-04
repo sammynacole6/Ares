@@ -15,14 +15,29 @@ body{
     text-align: center;
 }
 
-button{
-    width: 100%;
-    font-size: 16px;
+.half{
+    width: 50%;
+    display: inline-block;
 }
+.ui-layout-west button, .ui-layout-west label{
+    width: 100%;
+    font-size: 12px;
+}
+
+
+.ui-icon{
+    margin: auto;
+}
+
+.ui-layout-west label{
+    text-align: left;
+}
+
 
 input[type=text]{
     width: 90%;
     margin-bottom: 5px;
+    margin-top: 5px;
 }
 
 textarea{
@@ -32,5 +47,15 @@ textarea{
 }
 
 .hidden{
-    display:none;
+    display: none;
+}
+
+td{
+    border-bottom: 1px solid #555;
+}
+
+ .withtext, .withtext{
+    margin-bottom: -3px;
+    margin-right: 5px;
+    display: inline-block !important;
 }

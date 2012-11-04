@@ -65,9 +65,37 @@ function setup(){
         }
     });
 
+
+    $('#files').on("change", "input[name=file]",function(){
+        clicked = $(this).val();
+        if(clicked){
+            $.get('./' + clicked + '/', function(data){
+                editor.setValue(data);
+            });
+        }
+
+    });
+
+
     setInterval(function(){
-        //alert("hai");
-    }, 5000);
+
+        opened = $('input[name=file]:checked', '#files').val();
+        if(opened){
+            $.post('./' + opened + '/ding').error(function(){
+                alert('Something is awry, proceed with caution. This may be the result of lag, or having the same document open in multiple tabs/windows');
+            });
+        }
+        $('.status').each(function(){
+            file = this.id.split('-')[1];
+            var cur = $(this);
+            $.get('./' + file + '/status', function(data){
+                cur.removeClass (function (index, css) {
+                    return (css.match (/ui-icon-\S+/g) || []).join(' ');
+                });
+                cur.addClass(data);
+            });
+        });
+    }, 2000);
 
 
     $('#test').click(function(e){

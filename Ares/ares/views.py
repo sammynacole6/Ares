@@ -8,14 +8,19 @@ import os
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
+from django.contrib.auth.models import User
 from django.contrib import auth
+
+from django.utils import timezone
 
 from ares.command import *
 from ares.models import *
 
+import datetime
+
 
 def user_auth(request, user):
-    return request.user.is_authenticated() and str(request.user.pk) == user
+    return request.user.is_authenticated() and request.user == user
 
 
 def clean_output(path, output):
@@ -36,32 +41,92 @@ def login(request):
         return render_to_response("login.html", {'retry': False}, context_instance=RequestContext(request))
 
 
-def projectselect(request, user):
+def projectselect(request, user_id):
+    user = User.objects.get(pk=user_id)
     if not user_auth(request, user):
-        return HttpResponseForbidden(content="User not authenticated")
+        return HttpResponseForbidden(content="User not authorized")
     if request.method == 'POST':
-        Project(name=request.POST['projectname'], user=UserData.objects.get(user=user)).save()
-    user, created = UserData.objects.get_or_create(user=User.objects.get(pk=user))
+        Project(name=request.POST['projectname'], user=User.objects.get(pk=user_id)).save()
     return render_to_response('projectselect.html', {'user': user, 'projects': Project.objects.filter(user=user)}, context_instance=RequestContext(request))
 
 
-def project(request, user, project):
-    if not user_auth(request, user):
+def project(request, user_id, project_id):
+    user = User.objects.get(pk=user_id)
+    project = Project.objects.get(pk=project_id)
+
+    valid = user_auth(request, user) and project.user == user
+
+    if not valid:
         return HttpResponseForbidden(content="User not authenticated")
     if request.method == 'GET':
         return render_to_response('index.html', {'files': File.objects.filter(project=project)}, context_instance=RequestContext(request))
     else:
         if request.POST['mode'] == 'new':
-            File(name=request.POST['filename'], project=Project.objects.get(pk=project)).save()
-            return HttpResponse(status=200, content='File created')
+            File.create(name=request.POST['filename'], project=project).save()
+        elif request.POST['mode'] == 'delete':
+            File.objects.filter(project=project).filter(pk=request.POST['file']).delete()
+        return render_to_response('filelist.html', {'files': File.objects.filter(project=project)})
 
 
-def file(request, user, project, file):
+def file(request, user_id, project_id, file_id):
+    user = User.objects.get(pk=user_id)
+    project = Project.objects.get(pk=project_id)
+    file = File.objects.get(pk=file_id)
+
     valid = user_auth(request, user) and file.project == project and project.user == user
     if not valid:
         return HttpResponseForbidden(content="Something went wrong retrieving your file")
-    f = open(user + '/' + project + '/' + file, 'r')
-    return HttpResponse(status=200, content=f.read(), mimetype='text')
+    f = open(file.name, 'r')
+    return HttpResponse(status=200, content=f.read(), mimetype='text/data')
+
+
+def ding(request, user_id, project_id, file_id):
+    user = User.objects.get(pk=user_id)
+    project = Project.objects.get(pk=project_id)
+    file = File.objects.get(pk=file_id)
+
+    valid = user_auth(request, user) and file.project == project and project.user == user
+    if not valid:
+        return HttpResponseForbidden(content="User not authenticated")
+
+    session_key = request.session.session_key
+
+    can_claim = file.last_seen_open == None or timezone.now() - file.last_seen_open > datetime.timedelta(seconds=4)
+    is_mine = file.last_opened_by == session_key
+    is_iffy = timezone.now() - file.last_seen_open < datetime.timedelta(seconds=1)
+
+    if is_iffy:
+        return HttpResponse(status=409, content="File is iffy")
+
+    if can_claim or is_mine:
+        file.last_opened_by = session_key
+        file.last_seen_open = timezone.now()
+        file.save()
+        return HttpResponse(status=200, content="File ding'd")
+
+    else:
+        return HttpResponse(status=409, content="File claimed by someone else")
+
+
+def file_status(request, user_id, project_id, file_id):
+    user = User.objects.get(pk=user_id)
+    project = Project.objects.get(pk=project_id)
+    file = File.objects.get(pk=file_id)
+
+    valid = user_auth(request, user) and file.project == project and project.user == user
+    if not valid:
+        return HttpResponse(content="ui-icon-circle-close")
+
+    is_mine = file.last_opened_by == request.session.session_key
+
+    # Usually an open file is dinged every 2 seconds. if a file is dinged twice in this period, it is likely 
+    # someone using the same session has the file open. (or we have some serious lag?)
+    can_claim = file.last_seen_open == None or timezone.now() - file.last_seen_open > datetime.timedelta(seconds=4)
+    
+    if is_mine or can_claim:
+        return HttpResponse(content="ui-icon-check")
+    else:
+        return HttpResponse(content="ui-icon-alert")
 
 
 def run(request, user, project):

@@ -2,40 +2,28 @@ from django.db import models
 from django.contrib.auth.models import User
 from ares.settings import *
 
-
-class Run(models.Model):
-    user = models.ForeignKey('UserData')
-    source = models.FilePathField(path="")
-    binary = models.FilePathField(path="")
-
-    @classmethod
-    def create(cls, user):
-        user.numruns += 1
-        user.save()
-        filename = "/".join([
-            MEDIA_ROOT,
-            str(user.pk),
-            "%s.c" % user.numruns
-        ])
-        binname = "/".join([
-            MEDIA_ROOT,
-            str(user.pk),
-            "%s" % user.numruns
-        ])
-        return cls(user=user, source=filename, binary=binname)
-
-
-class UserData(models.Model):
-    user = models.ForeignKey(User, primary_key=True)
-    numruns = models.IntegerField(default=0)
+import os
 
 
 class Project(models.Model):
     name = models.CharField(max_length=255)
-    user = models.ForeignKey('UserData')
+    user = models.ForeignKey(User)
 
 
 class File(models.Model):
+
+    @classmethod
+    def create(cls, name, project):
+        filename = MEDIA_ROOT + '/' + str(project.user.pk) + '/' + str(project.pk) + '/' + name
+        book = cls(name=filename, basename=name, project=project)
+        directory = os.path.dirname(filename)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        open(filename, 'w')
+        return book
+
     name = models.CharField(max_length=255)
-    last_seen_open = models.DateTimeField(blank=True, null=True)
+    basename = models.CharField(max_length=255)
     project = models.ForeignKey('Project')
+    last_seen_open = models.DateTimeField(blank=True, null=True)
+    last_opened_by = models.CharField(blank=True, null=True, max_length=32)  # md5 hash

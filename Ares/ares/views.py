@@ -65,6 +65,11 @@ def project(request, user_id, project_id):
             File.create(name=request.POST['filename'], project=project).save()
         elif request.POST['mode'] == 'delete':
             File.objects.filter(project=project).filter(pk=request.POST['file']).delete()
+        elif request.POST['mode'] == 'edit':
+            file = File.objects.filter(project=project).filter(pk=request.POST['file'])[0]
+            f = open(file.name, 'w')
+            f.write(request.POST['content'])
+            f.close()
         return render_to_response('filelist.html', {'files': File.objects.filter(project=project)})
 
 
@@ -93,7 +98,7 @@ def ding(request, user_id, project_id, file_id):
 
     can_claim = file.last_seen_open == None or timezone.now() - file.last_seen_open > datetime.timedelta(seconds=4)
     is_mine = file.last_opened_by == session_key
-    is_iffy = timezone.now() - file.last_seen_open < datetime.timedelta(seconds=1)
+    is_iffy = file.last_seen_open != None and timezone.now() - file.last_seen_open < datetime.timedelta(seconds=1)
 
     if is_iffy:
         return HttpResponse(status=409, content="File is iffy")

@@ -38,6 +38,21 @@ function init_csrf_token(){
     });
 }
 
+function clear_selection(){
+    editor.setValue("Please open or create a file");
+    editor.setReadOnly(true);
+    $('input[name=file]', '#files').prop('checked', false);
+    $('input[name=file]', '#files').button("refresh");
+    $('#close_file').removeClass('ui-state-error');
+
+    $('#close_file').button('disable');
+    $('#save_file').button('disable');
+    $('#delete_file').button('disable');
+    $('#new_file').button('enable');
+
+
+}
+
 function setup(){
 
 
@@ -66,11 +81,26 @@ function setup(){
     });
 
 
+    editor.getSession().on('change', function(){
+        $('#close_file').addClass('ui-state-error');
+        $('#save_file').button('enable');
+    });
+
+
     $('#files').on("change", "input[name=file]",function(){
         clicked = $(this).val();
         if(clicked){
             $.get('./' + clicked + '/', function(data){
                 editor.setValue(data);
+                editor.selection.clearSelection();
+                editor.setReadOnly(false);
+                $('#close_file').removeClass('ui-state-error');
+
+                $('#close_file').button('enable');
+                $('#delete_file').button('enable');
+                $('#new_file').button('disable');
+                $('#save_file').button('disable');
+                $('.popup_filename').html($('input[name=file]:checked', '#files').next().children().text());
             });
         }
 

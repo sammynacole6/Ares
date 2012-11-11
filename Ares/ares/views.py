@@ -64,7 +64,9 @@ def project(request, user_id, project_id):
         if request.POST['mode'] == 'new':
             File.create(name=request.POST['filename'], project=project).save()
         elif request.POST['mode'] == 'delete':
-            File.objects.filter(project=project).filter(pk=request.POST['file']).delete()
+            file = File.objects.filter(project=project).filter(pk=request.POST['file'])[0]
+            os.remove(file.name)
+            file.delete()
         elif request.POST['mode'] == 'edit':
             file = File.objects.filter(project=project).filter(pk=request.POST['file'])[0]
             f = open(file.name, 'w')
